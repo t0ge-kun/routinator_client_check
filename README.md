@@ -31,9 +31,19 @@ Identify the IP address owner of the client whose "connection" value is 1 or mor
 
 ## Requirement
 
-- golang  ver 1.18.0 >
+- golang  ver > 1.18.0 
 - Enable your(target ?) Routinator API
 
 ## Usage
 
 `$ go run routinator_connect_client`
+
+
+## Edit in config.json
+
+```json
+{
+    "apiURL": "192.168.10.1",   <-- Target Routinator Address 
+    "apiPort": "9556"  <-- Target Routinator API port
+}
+```
