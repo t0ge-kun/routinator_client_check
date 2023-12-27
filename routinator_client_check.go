@@ -33,6 +33,10 @@ type Output struct {
 	TotalConnect int               `json:"total_connections"`
 }
 
+type IPApiResponse struct {
+	Org string `json:"org"`
+}
+
 func getOrganization(ip string) (string, error) {
 	// Check if the IP address is a local address
 	if isLocalAddress(ip) {
@@ -40,6 +44,26 @@ func getOrganization(ip string) (string, error) {
 	}
 
 	resp, err := http.Get("https://ipinfo.io/" + ip + "/org")
+	if err != nil || resp.StatusCode != http.StatusOK {
+		return getOrganizationFromIPApi(ip)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return getOrganizationFromIPApi(ip)
+	}
+
+	org := strings.TrimSpace(string(body))
+	if org == "" || org == "Unknown" {
+		return getOrganizationFromIPApi(ip)
+	}
+
+	return org, nil
+}
+
+func getOrganizationFromIPApi(ip string) (string, error) {
+	resp, err := http.Get("http://ip-api.com/json/" + ip)
 	if err != nil {
 		return "Unknown", err
 	}
@@ -50,7 +74,13 @@ func getOrganization(ip string) (string, error) {
 		return "Unknown", err
 	}
 
-	return strings.TrimSpace(string(body)), nil
+	var ipApiResponse IPApiResponse
+	err = json.Unmarshal(body, &ipApiResponse)
+	if err != nil {
+		return "Unknown", err
+	}
+
+	return ipApiResponse.Org, nil
 }
 
 func isLocalAddress(ip string) bool {
