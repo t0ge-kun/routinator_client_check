@@ -37,8 +37,8 @@ Specify the address or host name (FQDN) and port number of the target Routinator
 
 ```json
 {
-    "apiURL": "192.168.10.1",   <-- Target Routinator Address 
-    "apiPort": "9556"  <-- Target Routinator API port
+    "api_url": "192.168.10.1",   <-- Target Routinator Address 
+    "api_port": "9556"  <-- Target Routinator API port
 }
 ```
 
