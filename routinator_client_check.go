@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -33,6 +34,11 @@ type Output struct {
 }
 
 func getOrganization(ip string) (string, error) {
+	// Check if the IP address is a local address
+	if isLocalAddress(ip) {
+		return "local address", nil
+	}
+
 	resp, err := http.Get("https://ipinfo.io/" + ip + "/org")
 	if err != nil {
 		return "Unknown", err
@@ -45,6 +51,29 @@ func getOrganization(ip string) (string, error) {
 	}
 
 	return strings.TrimSpace(string(body)), nil
+}
+
+func isLocalAddress(ip string) bool {
+	ipNet := net.ParseIP(ip)
+	if ipNet == nil {
+		return false
+	}
+
+	localBlocks := []string{
+		"10.0.0.0/8",
+		"172.16.0.0/12",
+		"192.168.0.0/16",
+		"127.0.0.0/8",
+	}
+
+	for _, block := range localBlocks {
+		_, subnet, _ := net.ParseCIDR(block)
+		if subnet.Contains(ipNet) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func main() {
